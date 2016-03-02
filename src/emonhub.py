@@ -28,7 +28,7 @@ import interfacers.EmonHubPacketGenInterfacer
 import interfacers.EmonHubMqttInterfacer
 import interfacers.EmonHubTesterInterfacer
 import interfacers.EmonHubEmoncmsHTTPInterfacer
-
+import interfacers.EmonHubRateLimitedEmoncmsHTTPInterfacer
 ehi.EmonHubSerialInterfacer = interfacers.EmonHubSerialInterfacer.EmonHubSerialInterfacer
 ehi.EmonHubJeeInterfacer = interfacers.EmonHubJeeInterfacer.EmonHubJeeInterfacer
 ehi.EmonHubSocketInterfacer = interfacers.EmonHubSocketInterfacer.EmonHubSocketInterfacer
@@ -36,7 +36,8 @@ ehi.EmonHubPacketGenInterfacer = interfacers.EmonHubPacketGenInterfacer.EmonHubP
 ehi.EmonHubMqttInterfacer = interfacers.EmonHubMqttInterfacer.EmonHubMqttInterfacer
 ehi.EmonHubTesterInterfacer = interfacers.EmonHubTesterInterfacer.EmonHubTesterInterfacer
 ehi.EmonHubEmoncmsHTTPInterfacer = interfacers.EmonHubEmoncmsHTTPInterfacer.EmonHubEmoncmsHTTPInterfacer
-
+ehi.EmonHubRateLimitedEmoncmsHTTPInterfacer = \
+ interfacers.EmonHubRateLimitedEmoncmsHTTPInterfacer.EmonHubRateLimitedEmoncmsHTTPInterfacer
 """class EmonHub
 
 Monitors data inputs through EmonHubInterfacer instances,
