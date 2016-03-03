@@ -27,6 +27,7 @@ import interfacers.EmonHubSocketInterfacer
 import interfacers.EmonHubPacketGenInterfacer
 import interfacers.EmonHubMqttInterfacer
 import interfacers.EmonHubTesterInterfacer
+import interfacers.EmonHubTabularInterfacer
 import interfacers.EmonHubEmoncmsHTTPInterfacer
 import interfacers.EmonHubRateLimitedEmoncmsHTTPInterfacer
 ehi.EmonHubSerialInterfacer = interfacers.EmonHubSerialInterfacer.EmonHubSerialInterfacer
@@ -35,6 +36,7 @@ ehi.EmonHubSocketInterfacer = interfacers.EmonHubSocketInterfacer.EmonHubSocketI
 ehi.EmonHubPacketGenInterfacer = interfacers.EmonHubPacketGenInterfacer.EmonHubPacketGenInterfacer
 ehi.EmonHubMqttInterfacer = interfacers.EmonHubMqttInterfacer.EmonHubMqttInterfacer
 ehi.EmonHubTesterInterfacer = interfacers.EmonHubTesterInterfacer.EmonHubTesterInterfacer
+ehi.EmonHubTabularInterfacer = interfacers.EmonHubTabularInterfacer.EmonHubTabularInterfacer
 ehi.EmonHubEmoncmsHTTPInterfacer = interfacers.EmonHubEmoncmsHTTPInterfacer.EmonHubEmoncmsHTTPInterfacer
 ehi.EmonHubRateLimitedEmoncmsHTTPInterfacer = \
  interfacers.EmonHubRateLimitedEmoncmsHTTPInterfacer.EmonHubRateLimitedEmoncmsHTTPInterfacer
