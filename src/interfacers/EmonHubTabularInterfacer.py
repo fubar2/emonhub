@@ -60,7 +60,7 @@ class EmonHubTabularInterfacer(EmonHubInterfacer):
     
         data_string = json.dumps(databuffer, separators=(',', ':'))
         ds = ['\t'.join([str(y) for y in x]) for x in eval(data_string)]
-	post_body = '\n'.join(ds)
+    post_body = '\n'.join(ds)
 
         # time that the request was sent at
         sentat = int(time.time())
@@ -94,7 +94,7 @@ class EmonHubTabularInterfacer(EmonHubInterfacer):
         reply = ""
         fn = self._settings['outpath']
         try:
-	    f = open(fn,'a')
+        f = open(fn,'a')
             f.write(post_body)
             f.close()
             reply = 'ok'

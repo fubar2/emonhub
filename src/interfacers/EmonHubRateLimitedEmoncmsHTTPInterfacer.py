@@ -7,7 +7,12 @@ import httplib
 from pydispatch import dispatcher
 from emonhub_interfacer import EmonHubInterfacer
 
+"""
+2016-03-05 17:04:36,285 DEBUG    emoncmsorg ### downsampling [[1457157847, 5, 743, 0, 743, 234.9, 27.5, 0, 0, 0, 0, 0, 1], [1457157851, 5, 747, 0, 747, 235.84, 27.5, 0, 0, 0, 0, 0, 1], [1457157856, 5, 742, 0, 742, 234.88, 27.5, 0, 0, 0, 0, 0, 1], [1457157861, 5, 743, 0, 743, 235.26, 27.5, 0, 0, 0, 0, 0, 1], [1457157866, 5, 755, 0, 755, 236.32, 27.5, 0, 0, 0, 0, 0, 1], [1457157871, 5, 739, 0, 739, 234.64000000000001, 27.5, 0, 0, 0, 0, 0, 1], [1457157876, 5, 743, 0, 743, 235.47, 27.5, 0, 0, 0, 0, 0, 1]]
+2016-03-05 17:04:36,288 INFO     emoncmsorg sending: http://emoncms.org/input/bulk.json?apikey=E-M-O-N-C-M-S-A-P-I-K-E-Y&data=[[["1457157849","5","745","0","745","234","27","0","0","0","0","0","1"]],[["1457157856","5","742","0","742","234","27","0","0","0","0","0","1"]],[["1457157861","5","743","0","743","235","27","0","0","0","0","0","1"]],[["1457157866","5","755","0","755","236","27","0","0","0","0","0","1"]],[["1457157873","5","741","0","741","234","27","0","0","0","0","0","1"]]]&sentat=1457157876
+2016-03-05 17:04:37,129 DEBUG    emoncmsorg acknowledged receipt with 'ok' from http://emoncms.org
 
+"""
 
 
 class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
@@ -26,7 +31,7 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
             'url': "http://emoncms.org",
             'senddata': 1,
             'sendstatus': 0,
-            'SecsBetweenNodeMeans' : 5 # rate throttle
+            'downsamplesec' : 5 # rate throttle
         }
         
         self.buffer = []
@@ -48,24 +53,27 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
                 sums = [0 for i in range(rowl)]
                 for row in subset:
                     for i,val in enumerate(row):
-                        sums[i] += val
-                means = [x/nrow for x in sums]
+                        sums[i] += int(val)
+                means = [int(x/nrow) for x in sums]
                 res.append(means)
             return res
 
-        rawd = sorted(rawd)
+        rawd.sort() # time
+	self._log.debug('### downsampling %s' % str(rawd)) 
         # time sorted just in case
         # down sample to sampleInt by taking mean of the set of data rows
         # for that sampleInt interval
         rowl = len(rawd[0])
         nrow = len(rawd)
         lastrow = nrow - 1  # index offset for zero base
-        t0 = rawd[0][0]
+        row0 = rawd[0]
+        
+        t0 = float(row0[0])
         nextdue = t0 + sampleInt
         nextsample = []
         outdat = []
         for i,row in enumerate(rawd):
-            t = row[0]
+            t = float(row[0])
             if i == lastrow: # stop on last row
                 nextsample.append(row) # special case
             if t >= nextdue or i == lastrow: 
@@ -76,7 +84,7 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
             if i < lastrow:
                 nextsample.append(row) # more to do
         lns = len(nextsample) # 
-        if lns > 1:
+        if lns > 0:
              s = '# last sample has %d rows in bulkpost' % lns
              self._log.debug(s)
              mdat = get_means(nextsample)
@@ -126,13 +134,14 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
         if not 'apikey' in self._settings.keys() or str.__len__(str(self._settings['apikey'])) != 32 \
                 or str.lower(str(self._settings['apikey'])) == 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx':
             return
-        sampleInt = int(self._settings['SecsBetweenNodeMeans'])    
-        if time.time() - self.lastsent >= 2*sampleInt:
-            rawd = json.dump(databuffer, separators=(',', ':'))
-            outdat = downsample(rawd,sampleInt)
-            data_string = str(outdat)
+        sampleInt = float(self._settings['downsamplesec'])
+        if len(databuffer) == 0:
+            self._log.debug("##in bulkpost: zero rows in databuffer")
+        if (time.time() - self.lastsent) >= 2*sampleInt:
+            outdat = self.downsample(databuffer,sampleInt)
+            data_string = json.dumps(outdat,separators=(',', ':'))
         else: # no need to downsample
-            data_string = json.dumps(databuffer, separators=(',', ':'))
+            data_string = json.dumps(databuffer,separators=(',', ':'))
         # Prepare URL string of the form
         # http://domain.tld/emoncms/input/bulk.json?apikey=12345
         # &data=[[0,10,82,23],[5,10,82,23],[10,10,82,23]]

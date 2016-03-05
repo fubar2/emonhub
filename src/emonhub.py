@@ -38,8 +38,9 @@ ehi.EmonHubMqttInterfacer = interfacers.EmonHubMqttInterfacer.EmonHubMqttInterfa
 ehi.EmonHubTesterInterfacer = interfacers.EmonHubTesterInterfacer.EmonHubTesterInterfacer
 ehi.EmonHubTabularInterfacer = interfacers.EmonHubTabularInterfacer.EmonHubTabularInterfacer
 ehi.EmonHubEmoncmsHTTPInterfacer = interfacers.EmonHubEmoncmsHTTPInterfacer.EmonHubEmoncmsHTTPInterfacer
-ehi.EmonHubRateLimitedEmoncmsHTTPInterfacer = \
- interfacers.EmonHubRateLimitedEmoncmsHTTPInterfacer.EmonHubRateLimitedEmoncmsHTTPInterfacer
+ehi.EmonHubRateLimitedEmoncmsHTTPInterfacer = interfacers.EmonHubRateLimitedEmoncmsHTTPInterfacer.EmonHubRateLimitedEmoncmsHTTPInterfacer
+
+
 """class EmonHub
 
 Monitors data inputs through EmonHubInterfacer instances,
