@@ -60,7 +60,7 @@ class EmonHubTabularInterfacer(EmonHubInterfacer):
     
         data_string = json.dumps(databuffer, separators=(',', ':'))
         ds = ['\t'.join([str(y) for y in x]) for x in eval(data_string)]
-    post_body = '\n'.join(ds)
+        post_body = '\n'.join(ds)
 
         # time that the request was sent at
         sentat = int(time.time())
@@ -82,15 +82,6 @@ class EmonHubTabularInterfacer(EmonHubInterfacer):
         :param post_body:
         :return: the received reply if request is successful
         """
-        """Send data to server.
-
-        data (list): node and values (eg: '[node,val1,val2,...]')
-        time (int): timestamp, time when sample was recorded
-
-        return True if data sent correctly
-
-        """
-
         reply = ""
         fn = self._settings['outpath']
         try:

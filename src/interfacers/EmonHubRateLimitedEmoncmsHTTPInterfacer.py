@@ -54,12 +54,12 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
                 for row in subset:
                     for i,val in enumerate(row):
                         sums[i] += int(val)
-                means = [int(x/nrow) for x in sums]
+                means = [x/nrow for x in sums]
                 res.append(means)
             return res
 
         rawd.sort() # time
-	self._log.debug('### downsampling %s' % str(rawd)) 
+        self._log.debug('### downsampling %s' % str(rawd)) 
         # time sorted just in case
         # down sample to sampleInt by taking mean of the set of data rows
         # for that sampleInt interval
@@ -74,15 +74,12 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
         outdat = []
         for i,row in enumerate(rawd):
             t = float(row[0])
-            if i == lastrow: # stop on last row
-                nextsample.append(row) # special case
-            if t >= nextdue or i == lastrow: 
+            if t >= nextdue:
                 nextdue = t + sampleInt
                 mdat = get_means(nextsample)
                 outdat.append(mdat)
                 nextsample = []
-            if i < lastrow:
-                nextsample.append(row) # more to do
+            nextsample.append(row) # more to do
         lns = len(nextsample) # 
         if lns > 0:
              s = '# last sample has %d rows in bulkpost' % lns
@@ -90,8 +87,6 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
              mdat = get_means(nextsample)
              outdat.append(mdat)
         return outdat
-
-
 
 
     def receiver(self, cargo):
