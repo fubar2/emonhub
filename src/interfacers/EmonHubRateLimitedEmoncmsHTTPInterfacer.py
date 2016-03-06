@@ -62,7 +62,7 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
                 sums = [0 for i in range(rowl)]
                 for row in subset:
                     for i,val in enumerate(row):
-                        sums[i] += int(val)
+                        sums[i] += float(val)
                 means = [x/nrow for x in sums]
                 res.append(means)
             #if (len(res) == 1):
