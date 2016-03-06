@@ -53,17 +53,20 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
             res = []
             nodes = set([x[1] for x in inrows])
             for node in list(nodes):
-                subset = [x for x in inrows if x[1] == node]
+                if (len(nodes) > 1):
+                    subset = [x for x in inrows if x[1] == node]
+                else:
+                    subset = inrows # only one node
                 rowl = len(subset[0])
                 nrow = float(len(subset))
                 sums = [0 for i in range(rowl)]
                 for row in subset:
                     for i,val in enumerate(row):
                         sums[i] += int(val)
-                means = [int(x/nrow) for x in sums]
+                means = [x/nrow for x in sums]
                 res.append(means)
-            if (len(res) == 1):
-                res = res[0] # get rid of outer list
+            #if (len(res) == 1):
+            #    res = res[0] # get rid of outer list
             return res
 
         rawd.sort() # time
@@ -85,7 +88,8 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
             if t >= nextdue:
                 nextdue = t + sampleInt
                 mdat = get_means(nextsample)
-                outdat.append(mdat)
+                for m in mdat:
+                    outdat.append(m)
                 nextsample = []
             nextsample.append(row) # more to do
         lns = len(nextsample) # 
