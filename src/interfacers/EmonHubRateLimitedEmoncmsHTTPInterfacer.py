@@ -8,9 +8,15 @@ from pydispatch import dispatcher
 from emonhub_interfacer import EmonHubInterfacer
 
 """
-2016-03-05 17:04:36,285 DEBUG    emoncmsorg ### downsampling [[1457157847, 5, 743, 0, 743, 234.9, 27.5, 0, 0, 0, 0, 0, 1], [1457157851, 5, 747, 0, 747, 235.84, 27.5, 0, 0, 0, 0, 0, 1], [1457157856, 5, 742, 0, 742, 234.88, 27.5, 0, 0, 0, 0, 0, 1], [1457157861, 5, 743, 0, 743, 235.26, 27.5, 0, 0, 0, 0, 0, 1], [1457157866, 5, 755, 0, 755, 236.32, 27.5, 0, 0, 0, 0, 0, 1], [1457157871, 5, 739, 0, 739, 234.64000000000001, 27.5, 0, 0, 0, 0, 0, 1], [1457157876, 5, 743, 0, 743, 235.47, 27.5, 0, 0, 0, 0, 0, 1]]
-2016-03-05 17:04:36,288 INFO     emoncmsorg sending: http://emoncms.org/input/bulk.json?apikey=E-M-O-N-C-M-S-A-P-I-K-E-Y&data=[[["1457157849","5","745","0","745","234","27","0","0","0","0","0","1"]],[["1457157856","5","742","0","742","234","27","0","0","0","0","0","1"]],[["1457157861","5","743","0","743","235","27","0","0","0","0","0","1"]],[["1457157866","5","755","0","755","236","27","0","0","0","0","0","1"]],[["1457157873","5","741","0","741","234","27","0","0","0","0","0","1"]]]&sentat=1457157876
-2016-03-05 17:04:37,129 DEBUG    emoncmsorg acknowledged receipt with 'ok' from http://emoncms.org
+2016-03-05 17:41:05,941 DEBUG    emoncmsorg ### downsampling [[1457160036, 5, 821, 0, 821, 237.12, 26.900000000000002, 0, 0, 0, 0, 0, 1], [1457160041, 5, 820, 0, 820, 237.20000000000002, 26.900000000000002, 0, 0, 0, 0, 0, 1], [1457160046, 5, 821, 0, 821, 237.24, 26.900000000000002, 0, 0, 0, 0, 0, 1], [1457160051, 5, 818, 0, 818, 236.76, 26.900000000000002, 0, 0, 0, 0, 0, 1], [1457160056, 5, 817, 0, 817, 237.33, 26.900000000000002, 0, 0, 0, 0, 0, 1], [1457160061, 5, 822, 0, 822, 236.98000000000002, 26.900000000000002, 0, 0, 0, 0, 0, 1]]
+2016-03-05 17:41:05,944 DEBUG    emoncmsorg # last sample has 1 rows in bulkpost
+2016-03-05 17:41:05,945 INFO     emoncmsorg sending: http://emoncms.org/input/bulk.json?apikey=E-M-O-N-C-M-S-A-P-I-K-E-Y&data=[[[1457160036,5,821,0,821,237,26,0,0,0,0,0,1]],[[1457160041,5,820,0,820,237,26,0,0,0,0,0,1]],[[1457160046,5,821,0,821,237,26,0,0,0,0,0,1]],[[1457160051,5,818,0,818,236,26,0,0,0,0,0,1]],[[1457160056,5,817,0,817,237,26,0,0,0,0,0,1]],[[1457160061,5,822,0,822,236,26,0,0,0,0,0,1]]]&sentat=1457160065
+
+this works:
+2016-03-06 13:06:01,712 DEBUG    RFM2Pi     954 Sent to channel' : ToEmonCMS
+2016-03-06 13:06:06,034 INFO     emoncmsorg sending: http://emoncms.org/input/bulk.json?apikey=E-M-O-N-C-M-S-A-P-I-K-E-Y&data=[[1457229941,5,651,0,651,235.86,28.200000000000003,0,0,0,0,0,1],[1457229946,5,647,0,647,235.88,28.200000000000003,0,0,0,0,0,1],[1457229951,5,655,0,655,235.6,28.200000000000003,0,0,0,0,0,1],[1457229956,5,644,0,644,235.67000000000002,28.200000000000003,0,0,0,0,0,1],[1457229961,5,649,0,649,235.51,28.1,0,0,0,0,0,1]]&sentat=1457229966
+
+
 
 """
 
@@ -54,8 +60,10 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
                 for row in subset:
                     for i,val in enumerate(row):
                         sums[i] += int(val)
-                means = [x/nrow for x in sums]
+                means = [int(x/nrow) for x in sums]
                 res.append(means)
+            if (len(res) == 1):
+                res = res[0] # get rid of outer list
             return res
 
         rawd.sort() # time
@@ -86,6 +94,7 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
              self._log.debug(s)
              mdat = get_means(nextsample)
              outdat.append(mdat)
+        self._log.debug('### downsample returning %s' % str(outdat)) 
         return outdat
 
 
@@ -134,7 +143,7 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
             self._log.debug("##in bulkpost: zero rows in databuffer")
         if (time.time() - self.lastsent) >= 2*sampleInt:
             outdat = self.downsample(databuffer,sampleInt)
-            data_string = json.dumps(outdat,separators=(',', ':'))
+            data_string = str(outdat)
         else: # no need to downsample
             data_string = json.dumps(databuffer,separators=(',', ':'))
         # Prepare URL string of the form
@@ -149,7 +158,7 @@ class EmonHubRateLimitedEmoncmsHTTPInterfacer(EmonHubInterfacer):
         post_body = "data="+data_string+"&sentat="+str(sentat)
 
         # logged before apikey added for security
-        self._log.info("sending: " + post_url + "E-M-O-N-C-M-S-A-P-I-K-E-Y&" + post_body)
+        self._log.info("rate limited sending: " + post_url + "E-M-O-N-C-M-S-A-P-I-K-E-Y&" + post_body)
 
         # Add apikey to post_url
         post_url = post_url + self._settings['apikey']
